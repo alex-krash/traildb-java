@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8)
+project(traildb)
+set(CMAKE_BUILD_TYPE Release)
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(SOURCE_FILES TrailDBJava.c)
+add_library(traildb SHARED ${SOURCE_FILES})

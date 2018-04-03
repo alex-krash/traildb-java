@@ -1,0 +1,8 @@
+.idea/
+*.iml
+target/
+src/main/native/.idea/
+src/main/native/.kdev4/
+src/main/native/cmake-build-debug/
+*.kdev4
+*.so
