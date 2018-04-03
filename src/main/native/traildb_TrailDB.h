@@ -17,6 +17,14 @@ JNIEXPORT jlong JNICALL Java_traildb_TrailDB_openDb
 
 /*
  * Class:     traildb_TrailDB
+ * Method:    getMeta
+ * Signature: (J)Ltraildb/TrailDBMeta;
+ */
+JNIEXPORT jobject JNICALL Java_traildb_TrailDB_getMeta
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     traildb_TrailDB
  * Method:    getUUID
  * Signature: (JJ)[B
  */

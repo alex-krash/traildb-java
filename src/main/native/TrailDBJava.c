@@ -113,30 +113,42 @@ JNIEXPORT jlong JNICALL Java_traildb_TrailDB_openDb
         return 0;
     }
 
-    tdb_cursor *cursor = tdb_cursor_new(tdb);
-    tdb_get_trail(cursor, 0);
-
-    for (int i = 0; i < 2; i++) {
-        const tdb_event *event = tdb_cursor_peek(cursor);
-
-        printf("Got event with timestamp: %" PRIu64 " with %" PRIu64 " items\n", event->timestamp, event->num_items);
-        for (uint64_t j = 0; j < event->num_items; j++) {
-            tdb_item item = event->items[j];
-            uint64_t length;
-            const char *value = tdb_get_item_value(tdb, item, &length);
-
-            char *buf = (char*)malloc(length + 1);
-            memcpy(buf, value, length);
-            buf[length] = '\0';
-
-            printf("Got value: '%s' (was: '%s') with length %" PRIu64 "\n", buf, value, length);
-            free(buf);
-        }
-        tdb_cursor_next(cursor);
-    }
-
     return (jlong) tdb;
 }
+
+JNIEXPORT jobject JNICALL Java_traildb_TrailDB_getMeta
+        (JNIEnv *env, jobject obj, jlong pointer) {
+
+    tdb *tdb_pointer = (tdb *) pointer;
+
+    jclass meta_class = (*env)->FindClass(env, "traildb/TrailDBMeta");
+    if (!meta_class) {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/RuntimeException"),
+                         "Class 'traildb.TrailDBMeta' not found");
+        return 0;
+    }
+    jmethodID method = (*env)->GetMethodID(env, meta_class, "<init>", "(JJJJJ)V");
+    if (!method) {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/RuntimeException"),
+                         "Failed to find 'traildb.TrailDBMeta' constructor");
+        return 0;
+    }
+
+    jobject retval = (*env)->NewObject(env, meta_class, method,
+                                       (jlong) tdb_num_trails(tdb_pointer),
+                                       (jlong) tdb_num_events(tdb_pointer),
+                                       (jlong) tdb_num_fields(tdb_pointer),
+                                       (jlong) tdb_min_timestamp(tdb_pointer),
+                                       (jlong) tdb_max_timestamp(tdb_pointer));
+    if (!retval) {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/RuntimeException"),
+                         "Failed to create 'traildb.TrailDBMeta'");
+        return 0;
+    }
+    return retval;
+}
+
+
 
 // Get UUID value for particular trail_id
 JNIEXPORT jbyteArray JNICALL Java_traildb_TrailDB_getUUID

@@ -21,6 +21,7 @@ public class IntegrationTest {
 
     @Test
     public void testOneRecord() throws Exception {
+
         Path path = folder.newFolder().toPath();
 
         final UUID uuid = UUID.randomUUID();
@@ -32,12 +33,20 @@ public class IntegrationTest {
         }
 
         TrailDB db = new TrailDB(path);
+
+        // checking meta information
+        TrailDBMeta meta = db.getMeta();
+        assertEquals(1, meta.getNumTrails());
+        assertEquals(2, meta.getNumEvents());
+        assertEquals(fields.size() + 1, meta.getNumEvents()); // "time" is a field as well
+        assertEquals(timestamp, meta.getMinTimestamp());
+        assertEquals(timestamp * 2, meta.getMaxTimestamp());
+
         assertEquals(uuid, db.getUUID(0));
     }
 
     @Test
-    public void testTwoRecords() throws Exception
-    {
+    public void testTwoRecords() throws Exception {
         Path path = folder.newFolder().toPath();
 
         final UUID uuid_one = UUID.randomUUID();
