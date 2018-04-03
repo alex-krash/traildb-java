@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <traildb.h>
 #include <inttypes.h>
-#include <tdb_types.h>
+#include <memory.h>
 #include "traildb_TrailDB.h"
 #include "traildb_TrailDBCursor.h"
 #include "traildb_constructor_TrailDBNativeConstructor.h"
@@ -119,17 +119,18 @@ JNIEXPORT jlong JNICALL Java_traildb_TrailDB_openDb
     for (int i = 0; i < 2; i++) {
         const tdb_event *event = tdb_cursor_peek(cursor);
 
-        if (!event) {
-            puts("No events");
-            break;
-        }
-
         printf("Got event with timestamp: %" PRIu64 " with %" PRIu64 " items\n", event->timestamp, event->num_items);
         for (uint64_t j = 0; j < event->num_items; j++) {
             tdb_item item = event->items[j];
             uint64_t length;
             const char *value = tdb_get_item_value(tdb, item, &length);
-            printf("Got value: %s\n", value);
+
+            char *buf = (char*)malloc(length + 1);
+            memcpy(buf, value, length);
+            buf[length] = '\0';
+
+            printf("Got value: '%s' (was: '%s') with length %" PRIu64 "\n", buf, value, length);
+            free(buf);
         }
         tdb_cursor_next(cursor);
     }
